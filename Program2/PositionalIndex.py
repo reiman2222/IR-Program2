@@ -17,7 +17,7 @@ def tokenizeWordList(line):
    
     return wordlist
 
-def indexFile(posIndex, filename):
+def indexFile(posIndex, filename, fileNumber):
     with open(filename, 'r') as f:
         #go through file line by line
         currPos = 0
@@ -28,23 +28,22 @@ def indexFile(posIndex, filename):
             
             for word in tokenized:
                 if word in posIndex:
-                    addToPosIndex(posIndex, word, currPos, filename)
+                    addToPosIndex(posIndex, word, currPos, fileNumber)
                 else:
-                    posIndex[word] = [(filename,[currPos])]
-            currPos += 1
+                    posIndex[word] = [(fileNumber,[currPos])]
+                    
+                currPos += 1
 
 
-def addToPosIndex(posIndex, word, currPos, filename):
+def addToPosIndex(posIndex, word, currPos, fileNumber):
     L = posIndex[word]
     for tup in L:
-        if L[0] is filename:
-            L[1].append(currPos)
+        if tup[0] is fileNumber:
+            tup[1].append(currPos)
             return
-    #if not return this file has not been    
+    #if not return early then this file has not been    
     #encountered yet
-    posIndex[word].insert(0, (filename, [currPos]))
-
-
+    posIndex[word].append((fileNumber, [currPos]))
 
 #give_file_path(filename) returns the list of paths
 #stored in the file called filename
@@ -53,45 +52,68 @@ def giveFilePath(filename):
     words = [token for line in f for token in line.split()]
     return words
 
-#def buildPosIndex(invertedIndex, inputFiles):
+
+def buildPosIndex(posIndex, inputFiles):
+    fileNumber = 0
+    
+    
+    while(fileNumber < len(inputFiles)):
+        print("processing %s" %inputFiles[fileNumber])
+        indexFile(posIndex, inputFiles[fileNumber], fileNumber)
+        fileNumber += 1
     
 
-
-
-
-
+def doPhraseQuery(posIndex, phraseQ):
+    phraseL = phraseQ.split()
+    
+    
+    
+    
 #################    MAIN    ####################
 
 '''
 posIndex is a hash table that maps terms to list of tuples where the left part
-of each tuple holds a document name and the right part holds a list of positions
+of each tuple holds a document ID and the right part holds a list of positions
 where the term appears in the document contained in the left part.
 '''
 posIndex = {}
 
 inputFiles = giveFilePath('input-files.txt')
+#indexFile(posIndex, inputFiles[0], 0)
+buildPosIndex(posIndex, inputFiles)
 
-#BuildPosIndex(posIndex, inputFiles)
+hold = posIndex['cow']
+print(hold)
 
-indexFile(posIndex, inputFiles[0])
-  
-#userInput = get user input 
 '''
-while(userInput.isExit())
-    if(userInput.isPhraseQuery())
-      #phraseQuery = get phrase query from user
-      documents = doPhraseQuery(posIndex, phraseQuery)
-      if(documents != null):
-          print(documents)
-      else:
-          print("no match found")
+flag = True
+while(flag):
+    print("What do you want to do?")
+    print("(1) proximitiy query")
+    print("(2) phrase query")
+    print("(3) exit")
+    
+    uinput = input()
+    
+    if (uinput == '1'):
+        print("You chose proximity query.")
+        
+    elif (uinput == '2'):
+        print("You chose phrase query.")
+        
+    elif (uinput == '3'):
+        flag = False
+        
+    else:
+        print("You made a mistake.")
 
-    else: #input is a positional query
-        #posQuery = get post query from user
-        documents = doPosQuery(posIndex, posQuery)
-        if(Documents != null):
-          Print(documents)
-        else:
-          Print("no match found")    
-     
 '''
+
+'''
+outfile = "bitch.txt"
+bitchfile = open(outfile, 'w')
+for x in dict_list:
+  bitchfile.write(str(x))
+bitchfile.close()
+'''
+
