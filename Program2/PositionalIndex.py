@@ -65,9 +65,18 @@ def buildPosIndex(posIndex, inputFiles):
 
 def doPhraseQuery(posIndex, phraseQ):
     phraseL = phraseQ.split()
+    currPos = [0] * len(phraseL)
     
-    
-    
+    i = 0
+    for term in phraseL:
+        if term in posIndex:
+            posL[i] = posIndex[term]
+        else:
+            return [] #all terms are not present in corpus
+        i += 1
+        
+    while(currPos[0] < len(posL[0])):
+        
     
 #################    MAIN    ####################
 
@@ -82,8 +91,11 @@ inputFiles = giveFilePath('input-files.txt')
 #indexFile(posIndex, inputFiles[0], 0)
 buildPosIndex(posIndex, inputFiles)
 
+
 hold = posIndex['cow']
 print(hold)
+  
+#userInput = get user input 
 
 '''
 flag = True
