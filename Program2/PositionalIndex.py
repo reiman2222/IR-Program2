@@ -66,18 +66,43 @@ def buildPosIndex(posIndex, inputFiles):
 def doPhraseQuery(posIndex, phraseQ):
     phraseL = phraseQ.split()
     currPos = [0] * len(phraseL)
+    docIDs = []
+    posL = []
     
     i = 0
     for term in phraseL:
         if term in posIndex:
-            posL[i] = posIndex[term]
+            posL.append(posIndex[term])
         else:
             return [] #all terms are not present in corpus
         i += 1
         
-    while(currPos[0] < len(posL[0])):
-        
-    
+    while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
+        if (posL[0][0] == posL[1][0]):
+            phraseQueryFile(posL, currPos, docIDs)
+        else:
+            if posL[0][0] < posL[1][0]:
+                currPos[0] += 1
+            else:
+                currPos[1] += 1
+    return docIDs
+
+def phraseQueryFile(tuples, currPos, docIDs):
+    Ltuple = tuples[currPos[0]]
+    Rtuple = tuples[currPos[1]]
+    LPos = 0
+    RPos = 0
+    while (LPos < len(tuples[0][1]) &
+            RPos < len(tuples[1][1])):
+        print("let's see if this even works")
+        if ((Ltuple[1][LPos] + 1 == Rtuple[1][RPos])):
+            docIDs.append(Ltuple[0])
+            return
+        elif (Ltuple[1][LPos] < Rtuple[1][RPos]):
+            LPos += 1
+        else:
+            RPos += 1
+
 #################    MAIN    ####################
 
 '''
@@ -94,6 +119,9 @@ buildPosIndex(posIndex, inputFiles)
 
 hold = posIndex['cow']
 print(hold)
+
+docs = doPhraseQuery(posIndex, 'and rich')
+print(docs)
   
 #userInput = get user input 
 
