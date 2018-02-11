@@ -160,6 +160,10 @@ def posQueryFile(tuples, currPos, docIDs, dist):
         else:
             RPos += 1    
 
+def getPhrase():
+    print('enter a phrase for the query')
+    return input()
+
 #################    MAIN    ####################
 
 '''
@@ -178,7 +182,7 @@ print(docs)
   
 #userInput = get user input 
 
-'''
+
 flag = True
 while(flag):
     print("What do you want to do?")
@@ -190,15 +194,22 @@ while(flag):
     
     if (uinput == '1'):
         print("You chose proximity query.")
+        uphrase = getPhrase()
+        
+        print("What is the distance that you want for the Proximity Query?")
+        dist = int(input())
+        
+        doProxQuery(posIndex, uphrase, dist)
+        
         
     elif (uinput == '2'):
         print("You chose phrase query.")
+        uphrase = getPhrase()
+        doPhraseQuery(posIndex, uphrase)
         
     elif (uinput == '3'):
         flag = False
         
     else:
         print("You made a mistake.")
-
-'''
 
