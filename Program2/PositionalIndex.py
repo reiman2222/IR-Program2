@@ -68,7 +68,7 @@ def buildPosIndex(posIndex, inputFiles):
 #query phraseQ is satisfied. phraseQ is a space deliniated string of two terms.
 def doPhraseQuery(posIndex, phraseQ):
     phraseL = tokenizeWordList(phraseQ)
-	
+    
     currPos = [0] * len(phraseL)
     docIDs = []
     posL = []
@@ -120,7 +120,7 @@ def phraseQueryFile(tuples, currPos, docIDs):
 #dist is the maximum distance that the two terms can be seperated
 def doProxQuery(posIndex, proxQ, dist):
     termL = tokenizeWordList(proxQ)
-	
+    
     currPos = [0] * len(termL)
     docIDs = []
     posL = []
@@ -139,7 +139,7 @@ def doProxQuery(posIndex, proxQ, dist):
             currPos[0] += 1
             currPos[1] += 1
         else:
-            if posL[0][0] < posL[1][0]:
+            if((posL[0][0] < posL[1][0])):
                 currPos[0] += 1
             else:
                 currPos[1] += 1
@@ -197,17 +197,17 @@ while(flag):
     if (uinput == 1):
         print("You chose proximity query.")
         uphrase = getPhrase()
-        
+        print(uphrase)
         print("What is the distance that you want for the Proximity Query?")
         dist = int(input())
         
-        doProxQuery(posIndex, uphrase, dist)
+        print(doProxQuery(posIndex, uphrase, dist))
         
         
     elif (uinput == 2):
         print("You chose phrase query.")
         uphrase = getPhrase()
-        doPhraseQuery(posIndex, uphrase)
+        print(doPhraseQuery(posIndex, uphrase))
         
     elif (uinput == 3):
         flag = False
