@@ -1,10 +1,12 @@
 import re
+import porter
 
 #tokenizes a word
 def tokenize(word):
     regex = re.compile('[^a-zA-Z]+')
     w = regex.sub('', word)
     w = w.lower()
+    w = porter.stem(w)
     return w
 
 #tokenizes a list of words
