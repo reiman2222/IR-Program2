@@ -62,9 +62,11 @@ def buildPosIndex(posIndex, inputFiles):
         indexFile(posIndex, inputFiles[fileNumber], fileNumber)
         fileNumber += 1
     
-
+#doPhraseQuery(posIndex, phraseQ) returns a list of documents where the phrase
+#query phraseQ is satisfied. phraseQ is a space deliniated string of two terms.
 def doPhraseQuery(posIndex, phraseQ):
-    phraseL = phraseQ.split()
+    phraseL = tokenizeWordList(phraseQ)
+	
     currPos = [0] * len(phraseL)
     docIDs = []
     posL = []
@@ -76,10 +78,17 @@ def doPhraseQuery(posIndex, phraseQ):
         else:
             return [] #all terms are not present in corpus
         i += 1
-        
+    #print(posIndex['other'])
+    #print(posL[0])
+    #print(posIndex['things'])
+    #print(posL[1])
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
-        if (posL[0][0] == posL[1][0]):
+        #print(posL[0][0][0])
+        #print(posL[1][0][0])
+        if (posL[0][0][0] == posL[1][0][0]):
             phraseQueryFile(posL, currPos, docIDs)
+            currPos[0] += 1
+            currPos[1] += 1
         else:
             if posL[0][0] < posL[1][0]:
                 currPos[0] += 1
@@ -88,13 +97,13 @@ def doPhraseQuery(posIndex, phraseQ):
     return docIDs
 
 def phraseQueryFile(tuples, currPos, docIDs):
-    Ltuple = tuples[currPos[0]]
-    Rtuple = tuples[currPos[1]]
+    Ltuple = tuples[0][currPos[0]]
+    Rtuple = tuples[1][currPos[1]]
+
     LPos = 0
     RPos = 0
-    while (LPos < len(tuples[0][1]) &
-            RPos < len(tuples[1][1])):
-        print("let's see if this even works")
+    while (LPos < len(Ltuple[1]) and
+            RPos < len(Rtuple[1])):
         if ((Ltuple[1][LPos] + 1 == Rtuple[1][RPos])):
             docIDs.append(Ltuple[0])
             return
@@ -102,6 +111,54 @@ def phraseQueryFile(tuples, currPos, docIDs):
             LPos += 1
         else:
             RPos += 1
+
+
+#doProxQuery(posIndex, posQ, dist) returns a list of documents where the proximity 
+#query proxQ is satisfied. proxQ is a space deliniated string of two terms
+#dist is the maximum distance that the two terms can be seperated
+def doProxQuery(posIndex, proxQ, dist):
+    termL = tokenizeWordList(proxQ)
+	
+    currPos = [0] * len(termL)
+    docIDs = []
+    posL = []
+    
+    i = 0
+    for term in termL:
+        if term in posIndex:
+            posL.append(posIndex[term])
+        else:
+            return [] #all terms are not present in corpus
+        i += 1
+
+    while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
+        if (posL[0][0][0] == posL[1][0][0]):
+            posQueryFile(posL, currPos, docIDs, dist)
+            currPos[0] += 1
+            currPos[1] += 1
+        else:
+            if posL[0][0] < posL[1][0]:
+                currPos[0] += 1
+            else:
+                currPos[1] += 1
+    return docIDs
+
+
+def posQueryFile(tuples, currPos, docIDs, dist):
+    Ltuple = tuples[0][currPos[0]]
+    Rtuple = tuples[1][currPos[1]]
+
+    LPos = 0
+    RPos = 0
+    while (LPos < len(Ltuple[1]) and
+            RPos < len(Rtuple[1])):
+        if (abs(Ltuple[1][LPos] - Rtuple[1][RPos]) - 1 <= dist):
+            docIDs.append(Ltuple[0])
+            return
+        elif (Ltuple[1][LPos] < Rtuple[1][RPos]):
+            LPos += 1
+        else:
+            RPos += 1    
 
 #################    MAIN    ####################
 
@@ -113,14 +170,10 @@ where the term appears in the document contained in the left part.
 posIndex = {}
 
 inputFiles = giveFilePath('input-files.txt')
-#indexFile(posIndex, inputFiles[0], 0)
 buildPosIndex(posIndex, inputFiles)
 
 
-hold = posIndex['cow']
-print(hold)
-
-docs = doPhraseQuery(posIndex, 'and rich')
+docs = doProxQuery(posIndex, 'God good', 7)
 print(docs)
   
 #userInput = get user input 
@@ -147,13 +200,5 @@ while(flag):
     else:
         print("You made a mistake.")
 
-'''
-
-'''
-outfile = "bitch.txt"
-bitchfile = open(outfile, 'w')
-for x in dict_list:
-  bitchfile.write(str(x))
-bitchfile.close()
 '''
 
