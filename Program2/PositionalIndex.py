@@ -192,9 +192,9 @@ while(flag):
     print("(2) phrase query")
     print("(3) exit")
     
-    uinput = input()
+    uinput = int(input())
     
-    if (uinput == '1'):
+    if (uinput == 1):
         print("You chose proximity query.")
         uphrase = getPhrase()
         
@@ -204,12 +204,12 @@ while(flag):
         doProxQuery(posIndex, uphrase, dist)
         
         
-    elif (uinput == '2'):
+    elif (uinput == 2):
         print("You chose phrase query.")
         uphrase = getPhrase()
         doPhraseQuery(posIndex, uphrase)
         
-    elif (uinput == '3'):
+    elif (uinput == 3):
         flag = False
         
     else:
