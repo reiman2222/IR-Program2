@@ -80,15 +80,13 @@ def doPhraseQuery(posIndex, phraseQ):
         else:
             return [] #all terms are not present in corpus
         i += 1
-    #print(posIndex['other'])
-    #print(posL[0])
-    #print(posIndex['things'])
-    #print(posL[1])
+        
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
         #print(posL[0][0][0])
         #print(posL[1][0][0])
         if (posL[0][0][0] == posL[1][0][0]):
             phraseQueryFile(posL, currPos, docIDs)
+            print(docIDs)
             currPos[0] += 1
             currPos[1] += 1
         else:
@@ -107,8 +105,20 @@ def phraseQueryFile(tuples, currPos, docIDs):
     while (LPos < len(Ltuple[1]) and
             RPos < len(Rtuple[1])):
         if ((Ltuple[1][LPos] + 1 == Rtuple[1][RPos])):
-            docIDs.append(Ltuple[0])
-            return
+            if (len(docIDs) > 0):
+                if (docIDs[len(docIDs) - 1][0] == Ltuple[0]):
+                    docIDs[len(docIDs) - 1][1].append(Ltuple[1][LPos])
+                    #print('added to left: ', Ltuple[1][LPos])
+                else:
+                    docIDs.append( (Ltuple[0], [Ltuple[1][LPos]]) )
+                    #print('new tuple added')
+                    #print((Ltuple[0], [Ltuple[1][LPos]]))
+            else:
+                docIDs.append( (Ltuple[0], [Ltuple[1][LPos]]) )
+                #print('new tuple added doIDs was empty')
+                #print((Ltuple[0], [Ltuple[1][LPos]]))
+            LPos += 1
+            RPos += 1
         elif (Ltuple[1][LPos] < Rtuple[1][RPos]):
             LPos += 1
         else:
@@ -136,6 +146,7 @@ def doProxQuery(posIndex, proxQ, dist):
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
         if (posL[0][0][0] == posL[1][0][0]):
             posQueryFile(posL, currPos, docIDs, dist)
+            
             currPos[0] += 1
             currPos[1] += 1
         else:
@@ -166,6 +177,13 @@ def getPhrase():
     print('enter a phrase for the query')
     return input()
 
+
+
+def printQueryResults(docIDs, queryS, inputFiles):
+    print(queryS, ": found in ", len(docIDs), "documents")
+    #for tup in docIDs:
+        
+
 #################    MAIN    ####################
 
 '''
@@ -177,13 +195,11 @@ posIndex = {}
 
 inputFiles = giveFilePath('input-files.txt')
 buildPosIndex(posIndex, inputFiles)
-
-
-docs = doProxQuery(posIndex, 'God good', 7)
-print(docs)
+1
   
 #userInput = get user input 
 
+docs = []
 
 flag = True
 while(flag):
@@ -207,7 +223,8 @@ while(flag):
     elif (uinput == 2):
         print("You chose phrase query.")
         uphrase = getPhrase()
-        print(doPhraseQuery(posIndex, uphrase))
+        docs = doPhraseQuery(posIndex, uphrase)
+        printQueryResults(docs, uphrase, inputFiles)
         
     elif (uinput == 3):
         flag = False
