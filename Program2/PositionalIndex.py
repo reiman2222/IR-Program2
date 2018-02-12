@@ -20,7 +20,7 @@ def tokenizeWordList(line):
     return wordlist
 
 def indexFile(posIndex, filename, fileNumber):
-    with open(filename, 'r') as f:
+    with open(filename, encoding='latin1', mode='r') as f:
         #go through file line by line
         currPos = 0
         for line in f:
