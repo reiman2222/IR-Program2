@@ -11,7 +11,9 @@ def tokenize(word):
 
 #tokenizes a list of words
 def tokenizeWordList(line):
+    line.replace('--', '-')
     wordlist = line.split()
+    wordlist
     i = 0
     while i < len(wordlist):
         wordlist[i] = tokenize(wordlist[i])
@@ -20,7 +22,7 @@ def tokenizeWordList(line):
     return wordlist
 
 def indexFile(posIndex, filename, fileNumber):
-    with open(filename, encoding='latin1', mode='r') as f:
+    with open(filename, mode='r') as f:
         #go through file line by line
         currPos = 0
         for line in f:
@@ -82,15 +84,12 @@ def doPhraseQuery(posIndex, phraseQ):
         i += 1
         
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
-        #print(posL[0][0][0])
-        #print(posL[1][0][0])
-        if (posL[0][0][0] == posL[1][0][0]):
+        if (posL[0][currPos[0]][0] == posL[1][currPos[1]][0]):
             phraseQueryFile(posL, currPos, docIDs)
-            print(docIDs)
             currPos[0] += 1
             currPos[1] += 1
         else:
-            if posL[0][0] < posL[1][0]:
+            if posL[0][currPos[0]] < posL[1][currPos[1]]:
                 currPos[0] += 1
             else:
                 currPos[1] += 1
@@ -108,15 +107,10 @@ def phraseQueryFile(tuples, currPos, docIDs):
             if (len(docIDs) > 0):
                 if (docIDs[len(docIDs) - 1][0] == Ltuple[0]):
                     docIDs[len(docIDs) - 1][1].append(Ltuple[1][LPos])
-                    #print('added to left: ', Ltuple[1][LPos])
                 else:
                     docIDs.append( (Ltuple[0], [Ltuple[1][LPos]]) )
-                    #print('new tuple added')
-                    #print((Ltuple[0], [Ltuple[1][LPos]]))
             else:
                 docIDs.append( (Ltuple[0], [Ltuple[1][LPos]]) )
-                #print('new tuple added doIDs was empty')
-                #print((Ltuple[0], [Ltuple[1][LPos]]))
             LPos += 1
             RPos += 1
         elif (Ltuple[1][LPos] < Rtuple[1][RPos]):
@@ -131,7 +125,7 @@ def phraseQueryFile(tuples, currPos, docIDs):
 def doProxQuery(posIndex, proxQ, dist):
     termL = tokenizeWordList(proxQ)
     
-    currPos = [0] * len(termL)
+    currPos = [0] * len(termL) #index of current document
     docIDs = []
     posL = []
     
@@ -144,13 +138,14 @@ def doProxQuery(posIndex, proxQ, dist):
         i += 1
 
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
-        if (posL[0][0][0] == posL[1][0][0]):
+        if (posL[0][currPos[0]][0] == posL[1][currPos[1]][0]):
+            print(posL[0][currPos[0]][0], posL[1][currPos[1]][0])
             posQueryFile(posL, currPos, docIDs, dist)
-            
+            #print(docIDs)
             currPos[0] += 1
             currPos[1] += 1
         else:
-            if((posL[0][0] < posL[1][0])):
+            if((posL[0][currPos[0]] < posL[1][currPos[1]])):
                 currPos[0] += 1
             else:
                 currPos[1] += 1
@@ -166,22 +161,106 @@ def posQueryFile(tuples, currPos, docIDs, dist):
     while (LPos < len(Ltuple[1]) and
             RPos < len(Rtuple[1])):
         if (abs(Ltuple[1][LPos] - Rtuple[1][RPos]) - 1 <= dist):
-            docIDs.append(Ltuple[0])
-            return
+            if (len(docIDs) > 0):
+                if (docIDs[len(docIDs) - 1][0] == Ltuple[0]):
+                    docIDs[len(docIDs) - 1][1].append((Ltuple[1][LPos],Rtuple[1][RPos]))
+                else:
+                    docIDs.append( (Ltuple[0], [(Ltuple[1][LPos],Rtuple[1][RPos])]))
+            else:
+                docIDs.append( (Ltuple[0], [(Ltuple[1][LPos],Rtuple[1][RPos])]))
+            LPos += 1
+            RPos += 1
         elif (Ltuple[1][LPos] < Rtuple[1][RPos]):
             LPos += 1
         else:
             RPos += 1    
 
 def getPhrase():
-    print('enter a phrase for the query')
+    print('Enter a query')
     return input()
 
 
 
-def printQueryResults(docIDs, queryS, inputFiles):
-    print(queryS, ": found in ", len(docIDs), "documents")
-    #for tup in docIDs:
+def printQueryResultsPhr(docs, queryS, inputFiles):
+    preview = 10
+    
+    print('"' + queryS +  '" found in ' + str(len(docs)) + ' documents')
+    print(" ")
+    
+    for tup in docs:
+        filename = inputFiles[tup[0]]
+        docRaw = giveWordList(filename)
+        
+        print("There are " + str(len(tup[1])) + " matches in:")
+        print(filename)
+        print(' ')
+
+        for pos in tup[1]:
+            if(pos - preview < 0):
+                start = 0
+                preview = preview + preview/2
+            else:
+                start = pos - preview
+            
+            if(pos + preview < len(tup[1])):
+                end = len(tup[1]) - 1
+            else:
+                end = pos + preview
+            
+            docL = docRaw[start:end]
+            docS = " ".join(docL)
+            print(docS)
+            print(" ")
+
+
+def printQueryResultsPrx(docs, queryS, inputFiles):
+    preview = 7
+    
+    print('"' + queryS +  '" found in ' + str(len(docs)) + ' documents')
+    print(" ")
+    
+    for tup in docs:
+        filename = inputFiles[tup[0]]
+        docRaw = giveWordList(filename)
+        
+        print("There are " + str(len(tup[1])) + " matches in:")
+        print(filename)
+        print(' ')
+
+        for posTup in tup[1]:
+            
+            if(posTup[0] < posTup[1]):
+                begin = posTup[0]
+                stop = posTup[1]
+            else:
+                begin = posTup[1]
+                stop = posTup[0]
+                            
+            if(begin - preview < 0):
+                start = 0
+                #preview = preview + preview/2
+            else:
+                start = begin - preview
+            
+            if(stop + preview < len(tup[1])):
+                end = len(tup[1]) - 1
+            else:
+                end = stop + preview
+                
+            
+            
+            docL = docRaw[start:end]
+            docS = " ".join(docL)
+            print(docS)
+            print(" ")
+
+def giveWordList(filename):
+    f = open(filename, 'r')
+    words = []
+    for line in f:
+        for token in line.split():
+            words.extend(token.replace('--', '-').split('-'))
+    return words
         
 
 #################    MAIN    ####################
@@ -195,8 +274,11 @@ posIndex = {}
 
 inputFiles = giveFilePath('input-files.txt')
 buildPosIndex(posIndex, inputFiles)
-1
-  
+
+#L = posIndex['god']
+#for tup in L:
+#    print(tup)
+    
 #userInput = get user input 
 
 docs = []
@@ -204,7 +286,7 @@ docs = []
 flag = True
 while(flag):
     print("What do you want to do?")
-    print("(1) proximitiy query")
+    print("(1) proximity query")
     print("(2) phrase query")
     print("(3) exit")
     
@@ -213,18 +295,19 @@ while(flag):
     if (uinput == 1):
         print("You chose proximity query.")
         uphrase = getPhrase()
-        print(uphrase)
+        
         print("What is the distance that you want for the Proximity Query?")
         dist = int(input())
         
-        print(doProxQuery(posIndex, uphrase, dist))
+        docs = doProxQuery(posIndex, uphrase, dist)
+        printQueryResultsPrx(docs, uphrase, inputFiles)
         
         
     elif (uinput == 2):
         print("You chose phrase query.")
         uphrase = getPhrase()
         docs = doPhraseQuery(posIndex, uphrase)
-        printQueryResults(docs, uphrase, inputFiles)
+        printQueryResultsPrh(docs, uphrase, inputFiles)
         
     elif (uinput == 3):
         flag = False
