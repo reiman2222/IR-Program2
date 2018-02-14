@@ -9,17 +9,31 @@ def tokenize(word):
     w = porter.stem(w)
     return w
 
-#tokenizes a list of words
+#toeknizeWordList(line) tokenizes a string of words. 
+#line is the string to tokenize.
+#returns list of tokenized words.
 def tokenizeWordList(line):
-    line.replace('--', '-')
-    wordlist = line.split()
-    wordlist
+    wordlist = []
+    
+    for token in line.split():
+        wordlist.extend(token.replace('--', '-').split('-'))
+    
     i = 0
-    while i < len(wordlist):
+    while(i < len(wordlist)):
+        
         wordlist[i] = tokenize(wordlist[i])
         i = i + 1
-   
+    
     return wordlist
+
+
+def giveWordList(filename):
+    f = open(filename, 'r')
+    words = []
+    for line in f:
+        for token in line.split():
+            words.extend(token.replace('--', '-').split('-'))
+    return words
 
 def indexFile(posIndex, filename, fileNumber):
     with open(filename, mode='r') as f:
@@ -27,8 +41,6 @@ def indexFile(posIndex, filename, fileNumber):
         currPos = 0
         for line in f:
             tokenized = tokenizeWordList(line)
-            
-            #print(tokenized)
             
             for word in tokenized:
                 if word in posIndex:
@@ -67,7 +79,7 @@ def buildPosIndex(posIndex, inputFiles):
         fileNumber += 1
     
 #doPhraseQuery(posIndex, phraseQ) returns a list of documents where the phrase
-#query phraseQ is satisfied. phraseQ is a space deliniated string of two terms.
+#query phraseQ is satisfied. phraseQ is a space delineated string of two terms.
 def doPhraseQuery(posIndex, phraseQ):
     phraseL = tokenizeWordList(phraseQ)
     
@@ -139,9 +151,7 @@ def doProxQuery(posIndex, proxQ, dist):
 
     while((currPos[0] < len(posL[0])) & (currPos[1] < len(posL[1]))):
         if (posL[0][currPos[0]][0] == posL[1][currPos[1]][0]):
-            print(posL[0][currPos[0]][0], posL[1][currPos[1]][0])
-            posQueryFile(posL, currPos, docIDs, dist)
-            #print(docIDs)
+            proxQueryFile(posL, currPos, docIDs, dist)
             currPos[0] += 1
             currPos[1] += 1
         else:
@@ -152,7 +162,7 @@ def doProxQuery(posIndex, proxQ, dist):
     return docIDs
 
 
-def posQueryFile(tuples, currPos, docIDs, dist):
+def proxQueryFile(tuples, currPos, docIDs, dist):
     Ltuple = tuples[0][currPos[0]]
     Rtuple = tuples[1][currPos[1]]
 
@@ -213,10 +223,10 @@ def printQueryResultsPhr(docs, queryS, inputFiles):
             print(" ")
 
 
-def printQueryResultsPrx(docs, queryS, inputFiles):
+def printQueryResultsPrx(docs, queryS, inputFiles, dist):
     preview = 7
     
-    print('"' + queryS +  '" found in ' + str(len(docs)) + ' documents')
+    print('"' + queryS +  '" within ' + str(dist)+ ' words, found in ' + str(len(docs)) + ' documents')
     print(" ")
     
     for tup in docs:
@@ -238,7 +248,7 @@ def printQueryResultsPrx(docs, queryS, inputFiles):
                             
             if(begin - preview < 0):
                 start = 0
-                #preview = preview + preview/2
+                preview = preview + preview/2
             else:
                 start = begin - preview
             
@@ -254,13 +264,6 @@ def printQueryResultsPrx(docs, queryS, inputFiles):
             print(docS)
             print(" ")
 
-def giveWordList(filename):
-    f = open(filename, 'r')
-    words = []
-    for line in f:
-        for token in line.split():
-            words.extend(token.replace('--', '-').split('-'))
-    return words
         
 
 #################    MAIN    ####################
@@ -273,13 +276,8 @@ where the term appears in the document contained in the left part.
 posIndex = {}
 
 inputFiles = giveFilePath('input-files.txt')
-buildPosIndex(posIndex, inputFiles)
 
-#L = posIndex['god']
-#for tup in L:
-#    print(tup)
-    
-#userInput = get user input 
+buildPosIndex(posIndex, inputFiles)
 
 docs = []
 
@@ -300,14 +298,14 @@ while(flag):
         dist = int(input())
         
         docs = doProxQuery(posIndex, uphrase, dist)
-        printQueryResultsPrx(docs, uphrase, inputFiles)
+        printQueryResultsPrx(docs, uphrase, inputFiles, dist)
         
         
     elif (uinput == 2):
         print("You chose phrase query.")
         uphrase = getPhrase()
         docs = doPhraseQuery(posIndex, uphrase)
-        printQueryResultsPrh(docs, uphrase, inputFiles)
+        printQueryResultsPhr(docs, uphrase, inputFiles)
         
     elif (uinput == 3):
         flag = False
