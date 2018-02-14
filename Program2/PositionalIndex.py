@@ -1,7 +1,8 @@
 import re
 import porter
 
-#tokenizes a word
+#tokenize(word) tokenizes a string. 
+#word is the string to tokenize.
 def tokenize(word):
     regex = re.compile('[^a-zA-Z]+')
     w = regex.sub('', word)
@@ -26,7 +27,9 @@ def tokenizeWordList(line):
     
     return wordlist
 
-
+#giveWordList(filename) converts a file called filename
+#to a list of words breaking the string the same way
+#as tokenizeWordList. returns a list of words.
 def giveWordList(filename):
     f = open(filename, 'r')
     words = []
@@ -35,6 +38,10 @@ def giveWordList(filename):
             words.extend(token.replace('--', '-').split('-'))
     return words
 
+#indexFile(posIndex, filename, fileNumber) indexes a file
+#called filename. posIndex is the positional index to
+#update. fileNumber is the document ID for
+#filename.
 def indexFile(posIndex, filename, fileNumber):
     with open(filename, mode='r') as f:
         #go through file line by line
@@ -50,7 +57,9 @@ def indexFile(posIndex, filename, fileNumber):
                     
                 currPos += 1
 
-
+#addToPosIndex(posIndex, word, currPos, fileNumber) adds term word
+#to posIndex. currPos is the position of word in file represented by 
+#fileNumber.
 def addToPosIndex(posIndex, word, currPos, fileNumber):
     L = posIndex[word]
     for tup in L:
@@ -68,10 +77,10 @@ def giveFilePath(filename):
     words = [token for line in f for token in line.split()]
     return words
 
-
+#buildPosIndex(posIndex, inputFiles) indexes all files in
+#inputFiles. inputFiles is a list of file paths. 
 def buildPosIndex(posIndex, inputFiles):
     fileNumber = 0
-    
     
     while(fileNumber < len(inputFiles)):
         print("processing %s" %inputFiles[fileNumber])
@@ -107,6 +116,8 @@ def doPhraseQuery(posIndex, phraseQ):
                 currPos[1] += 1
     return docIDs
 
+#phraseQueryFile(tuples, currPos, docIDs) adds querrys 
+#that match to docIDs.
 def phraseQueryFile(tuples, currPos, docIDs):
     Ltuple = tuples[0][currPos[0]]
     Rtuple = tuples[1][currPos[1]]
@@ -161,7 +172,8 @@ def doProxQuery(posIndex, proxQ, dist):
                 currPos[1] += 1
     return docIDs
 
-
+#proxQueryFile(tuples, currPos, docIDs, dist) adds querrys 
+#that match to docIDs.
 def proxQueryFile(tuples, currPos, docIDs, dist):
     Ltuple = tuples[0][currPos[0]]
     Rtuple = tuples[1][currPos[1]]
@@ -185,12 +197,15 @@ def proxQueryFile(tuples, currPos, docIDs, dist):
         else:
             RPos += 1    
 
+#getPhrase() gets a query from the user.
 def getPhrase():
     print('Enter a query')
     return input()
 
 
-
+#printQueryResutsPhr(docs, queryS, inputFiles)
+#prints text preview for each satisfied query in docs.
+#
 def printQueryResultsPhr(docs, queryS, inputFiles):
     preview = 10
     
