@@ -31,7 +31,7 @@ def tokenizeWordList(line):
 #to a list of words breaking the string the same way
 #as tokenizeWordList. returns a list of words.
 def giveWordList(filename):
-    f = open(filename, 'r')
+    f = open(filename, encoding='latin1' , mode='r')
     words = []
     for line in f:
         for token in line.split():
@@ -43,7 +43,7 @@ def giveWordList(filename):
 #update. fileNumber is the document ID for
 #filename.
 def indexFile(posIndex, filename, fileNumber):
-    with open(filename, mode='r') as f:
+    with open(filename, encoding='latin1' , mode='r') as f:
         #go through file line by line
         currPos = 0
         for line in f:
@@ -205,7 +205,6 @@ def getPhrase():
 
 #printQueryResutsPhr(docs, queryS, inputFiles)
 #prints text preview for each satisfied query in docs.
-#
 def printQueryResultsPhr(docs, queryS, inputFiles):
     preview = 10
     
@@ -237,7 +236,8 @@ def printQueryResultsPhr(docs, queryS, inputFiles):
             print(docS)
             print(" ")
 
-
+#printQueryResutsPhx(docs, queryS, inputFiles)
+#prints text preview for each satisfied query in docs.
 def printQueryResultsPrx(docs, queryS, inputFiles, dist):
     preview = 7
     
